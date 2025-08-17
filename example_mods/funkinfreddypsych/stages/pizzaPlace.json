@@ -1,0 +1,185 @@
+{
+	"camera_boyfriend": [
+		-150,
+		-100
+	],
+	"preload": {
+		"images/stageback": 3,
+		"images/stagefront": 3,
+		"images/stagecurtains": 2,
+		"images/stage_light": 2
+	},
+	"_editorMeta": {
+		"boyfriend": "bf",
+		"dad": "dad",
+		"gf": "gf"
+	},
+	"boyfriend": [
+		1032,
+		-18
+	],
+	"stageUI": "",
+	"girlfriend": [
+		541,
+		296
+	],
+	"objects": [
+		{
+			"x": -569,
+			"y": -400,
+			"scale": [
+				1,
+				1
+			],
+			"image": "bgFloor",
+			"flipX": false,
+			"filters": 3,
+			"color": "FFFFFF",
+			"angle": 0,
+			"name": "bgFloor",
+			"antialiasing": true,
+			"flipY": false,
+			"scroll": [
+				1,
+				1
+			],
+			"alpha": 1,
+			"type": "sprite"
+		},
+		{
+			"x": -695,
+			"y": 488,
+			"scale": [
+				0.98,
+				0.98
+			],
+			"image": "backTable",
+			"flipX": false,
+			"filters": 3,
+			"color": "FFFFFF",
+			"angle": 0,
+			"name": "backTable",
+			"antialiasing": true,
+			"flipY": false,
+			"scroll": [
+				1,
+				1
+			],
+			"alpha": 1,
+			"type": "sprite"
+		},
+		{
+			"type": "gf"
+		},
+		{
+			"x": -874,
+			"y": 535,
+			"scale": [
+				1,
+				1
+			],
+			"image": "midTables",
+			"flipX": false,
+			"filters": 3,
+			"color": "FFFFFF",
+			"angle": 0,
+			"name": "midTables",
+			"antialiasing": true,
+			"flipY": false,
+			"scroll": [
+				1,
+				1
+			],
+			"alpha": 1,
+			"type": "sprite"
+		},
+		{
+			"type": "dad"
+		},
+		{
+			"type": "boyfriend"
+		},
+		{
+			"x": -1250,
+			"y": 584,
+			"scale": [
+				1.15,
+				1.15
+			],
+			"image": "fgTables",
+			"flipX": false,
+			"filters": 3,
+			"color": "FFFFFF",
+			"angle": 0,
+			"name": "fgTables",
+			"antialiasing": true,
+			"flipY": false,
+			"scroll": [
+				1,
+				1
+			],
+			"alpha": 1,
+			"type": "sprite"
+		},
+		{
+			"x": -1032,
+			"y": -848,
+			"scale": [
+				1,
+				1
+			],
+			"image": "overlayUf",
+			"flipX": false,
+			"filters": 3,
+			"color": "FFFFFF",
+			"angle": 0,
+			"name": "overlayUf",
+			"antialiasing": true,
+			"flipY": false,
+			"scroll": [
+				1,
+				1
+			],
+			"alpha": 1,
+			"type": "sprite"
+		},
+		{
+			"x": -1188,
+			"y": -881,
+			"scale": [
+				1,
+				1
+			],
+			"image": "overlayFront",
+			"flipX": false,
+			"filters": 3,
+			"color": "FFFFFF",
+			"angle": 0,
+			"name": "overlayFront",
+			"antialiasing": true,
+			"flipY": false,
+			"scroll": [
+				1,
+				1
+			],
+			"alpha": 1,
+			"type": "sprite"
+		}
+	],
+	"camera_girlfriend": [
+		-80,
+		-135
+	],
+	"defaultZoom": 0.72,
+	"opponent": [
+		377,
+		134
+	],
+	"directory": "week1",
+	"camera_speed": 1,
+	"hide_girlfriend": false,
+	"camera_opponent": [
+		150,
+		-110
+	]
+}

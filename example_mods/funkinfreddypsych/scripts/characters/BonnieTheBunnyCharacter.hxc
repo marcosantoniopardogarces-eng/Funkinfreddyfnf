@@ -1,0 +1,142 @@
+import funkin.play.character.MultiSparrowCharacter;
+import flixel.FlxSprite;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.util.FlxSort;
+import funkin.Conductor;
+import funkin.graphics.FunkinSprite;
+import funkin.graphics.shaders.AdjustColorShader;
+import funkin.play.PlayState;
+
+class BonnieTheBunnyCharacter extends MultiSparrowCharacter {
+	var songBeatTimes:Array<Float>;
+	var songBeatDirections:Array<Int>;
+	var currentBeatIndex:Int;
+	var isFlipped:Bool;
+	var currentTween:FlxTween;
+	var animNames = ["strum1", "strum2", "strum3"];
+	var animSuffix = "";
+	
+	var chartAnimTimes:Array<Float> = [];
+	var chartAnimDirs:Array<Int> = [];
+	var currentChartIndex:Int = 0;
+
+	function new() {
+		super('bonnie');
+		songBeatTimes = [];
+		songBeatDirections = [];
+		currentBeatIndex = 0;
+		isFlipped = false;
+		for (anim in animNames) ignoreExclusionPref.push(anim);
+	}
+
+	override function onCreate(event) {
+		super.onCreate(event);
+		var adjustColor = new AdjustColorShader();
+		adjustColor.brightness = -13;
+		adjustColor.contrast = 0;
+		adjustColor.saturation = -48;
+		adjustColor.hue = -26;
+		this.shader = adjustColor;
+
+		initChartTimemap();
+	}
+
+	function initChartTimemap():Void {
+		chartAnimTimes = [];
+		chartAnimDirs = [];
+		currentChartIndex = 0;
+		
+		var animChart:SongDifficulty = PlayState.instance.currentSong.getDifficulty('animatronics');
+		if (animChart == null) return;
+
+		var animNotes:Array<SongNoteData> = animChart.notes;
+
+		animNotes.sort(function(a:SongNoteData, b:SongNoteData):Int {
+			return FlxSort.byValues(FlxSort.ASCENDING, a.time, b.time);
+		});
+
+		for (note in animNotes) {
+			if (note.data >= 0 && note.data <= 2) {
+				chartAnimTimes.push(note.time);
+				chartAnimDirs.push(note.data);
+			}
+		}
+	}
+
+	
+	public function onSongEvent(event) {
+			super.onSongEvent(event);
+			if (event.eventData.eventKind == "BonnieWalk") {
+				var v = event.eventData.value;
+				animSuffix = v.suffix;
+				walkTo(v.posX, v.duration, v.suffix);
+			}
+			
+	}
+	override function playAnimation(name:String, restart:Bool, ignoreOther:Bool, reversed:Bool):Void {
+        super.playAnimation(name + animSuffix, restart, ignoreOther, reversed);
+    }
+
+	override function onSongRetry(event) {
+		super.onSongRetry(event);
+		currentBeatIndex = 0;
+		currentChartIndex = 0;
+		tweenPaused = false;
+		shouldBeIdle = true;
+		animSuffix = "";
+		if (currentTween != null) {
+			currentTween.cancel();
+			currentTween = null;
+		}
+		this.playAnimation('idle', true, true);
+		initChartTimemap();
+	}
+
+	
+	function setFlipped(f:Bool) {
+		if (f == isFlipped) return;
+		isFlipped = f;
+		this.flipX = f;
+	}
+
+	public function walkTo(x:Float, d:Float, ?suffix:String) {
+		if (currentTween != null) {
+			currentTween.cancel();
+			currentTween = null;
+		}
+		
+		var walkAnimName = 'walk' + suffix;
+	
+		this.playAnimation(walkAnimName, true, false);
+		
+		setFlipped(x < PlayState.instance.currentStage.getCharacter('bonnie').x);
+		currentTween = FlxTween.tween(PlayState.instance.currentStage.getCharacter('bonnie'), {x: x}, d, {
+			ease: FlxEase.sineInOut,
+			onComplete: function(t) {
+					this.playAnimation('idle', true, true);
+			}
+		});
+	}
+
+	function playBonnieChartAnimation(direction:Int):Void {
+		var animName:String;
+		switch (direction) {
+			case 0: animName = "strum1";
+			case 1: animName = "strum2";
+			case 2: animName = "strum3";
+			default: return;
+		}
+		PlayState.instance.currentStage.getCharacter('bonnie').playAnimation(animName, true, true);
+	}
+
+	override function onUpdate(event) {
+		super.onUpdate(event);
+		
+		if (currentChartIndex < chartAnimTimes.length && chartAnimTimes[currentChartIndex] <= Conductor.instance.songPosition) {
+			var nextDir:Int = chartAnimDirs[currentChartIndex];
+			playBonnieChartAnimation(nextDir);
+			currentChartIndex++;
+		}
+	}
+}

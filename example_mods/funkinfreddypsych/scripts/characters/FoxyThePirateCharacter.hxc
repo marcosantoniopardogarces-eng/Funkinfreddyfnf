@@ -1,0 +1,195 @@
+import funkin.play.character.SparrowCharacter;
+import flixel.FlxSprite;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.util.FlxSort;
+import funkin.Conductor;
+import funkin.graphics.FunkinSprite;
+import funkin.graphics.shaders.AdjustColorShader;
+import funkin.play.PlayState;
+
+class FoxyThePirateCharacter extends SparrowCharacter {
+	var songBeatTimes:Array<Float>;
+	var songBeatDirections:Array<Int>;
+	var currentBeatIndex:Int;
+	var foxyTorso:FlxSprite;
+	var torsoInitialized:Bool;
+	var isFlipped:Bool;
+	var currentTween:FlxTween;
+	var baseOffsetX:Float = -55;
+	var baseOffsetY:Float = -676;
+	var animNames:Array<String>;
+
+	var chartAnimTimes:Array<Float> = [];
+	var chartAnimDirs:Array<Int> = [];
+	var currentChartIndex:Int = 0;
+
+	function new() {
+		super('foxy');
+		songBeatTimes = [];
+		songBeatDirections = [];
+		currentBeatIndex = 0;
+		torsoInitialized = false;
+		isFlipped = false;
+		animNames = ["singLEFT", "singDOWN", "singUP", "singRIGHT"];
+		for (anim in animNames) ignoreExclusionPref.push(anim);
+	}
+
+	override function onCreate(event) {
+		super.onCreate(event);
+		var adjustColor = new AdjustColorShader();
+		adjustColor.brightness = -20;
+        adjustColor.saturation = -28;
+        adjustColor.hue = -19;
+        adjustColor.contrast = -18;
+		this.shader = adjustColor;
+		foxyTorso = FunkinSprite.createSparrow(0, 0, "characters/foxy/foxyBody");
+		foxyTorso.animation.addByPrefix('walk', 'foxy body walk', 24, true);
+		foxyTorso.animation.play('walk');
+		foxyTorso.offset.set(baseOffsetX, baseOffsetY);
+		foxyTorso.antialiasing = this.antialiasing;
+		this.flipX = false;
+		if (foxyTorso != null) {
+			foxyTorso.flipX = false;
+			foxyTorso.setPosition(this.x, this.y);
+		}
+
+		initChartTimemap();
+	}
+
+	function initChartTimemap():Void {
+		trace('Initializing Foxy chart timings...');
+		chartAnimTimes = [];
+		chartAnimDirs = [];
+		currentChartIndex = 0;
+		
+		var animChart:SongDifficulty = PlayState.instance.currentSong.getDifficulty('animatronics');
+		if (animChart == null) 
+			return;
+
+		var animNotes:Array<SongNoteData> = animChart.notes;
+
+		animNotes.sort(function(a:SongNoteData, b:SongNoteData):Int {
+			return FlxSort.byValues(FlxSort.ASCENDING, a.time, b.time);
+		});
+
+		for (note in animNotes) {
+			chartAnimTimes.push(note.time);
+			chartAnimDirs.push(note.data);
+		}
+	}
+
+	public function onSongEvent(event) {
+		super.onSongEvent(event);
+		if (event.eventData.eventKind == "FoxyWalk") {
+			var v = event.eventData.value;
+			walkTo(v.posX, v.duration);
+		}
+	}
+
+	override function onSongRetry(event) {
+		super.onSongRetry(event);
+		currentBeatIndex = 0;
+		currentChartIndex = 0;
+		torsoInitialized = false;
+		if (foxyTorso != null) {
+			foxyTorso.flipX = false;
+			foxyTorso.setPosition(this.x, this.y);
+		}
+		if (currentTween != null) {
+			currentTween.cancel();
+			currentTween = null;
+		}
+		initChartTimemap();
+	}
+
+	function setFlipped(f:Bool) {
+		if (f == isFlipped) return;
+		isFlipped = f;
+		this.flipX = f;
+		if (foxyTorso != null) {
+			foxyTorso.flipX = f;
+			foxyTorso.offset.set(f ? -baseOffsetX : baseOffsetX, baseOffsetY);
+		}
+	}
+
+	public function walkTo(x:Float, d:Float) {
+		if (currentTween != null) {
+			currentTween.cancel();
+			currentTween = null;
+		}
+		var char = PlayState.instance.currentStage.getCharacter('foxy');
+		if (char == null) return;
+		setFlipped(x < char.x);
+		currentTween = FlxTween.tween(char, {x: x}, d, {
+			ease: FlxEase.sineInOut,
+			onUpdate: function(_) {
+				if (foxyTorso != null && char != null) {
+					var tx = char.x;
+					if (isFlipped) tx += char.width - foxyTorso.width;
+					foxyTorso.setPosition(tx, char.y);
+				}
+			},
+			onComplete: function(t) {
+				if (t == currentTween) {
+					currentTween = null;
+				}
+				if (char != null) char.playAnimation('idle', true, true);
+			}
+		});
+		if (char != null) char.playAnimation('idle', true, true);
+	}
+
+	function playFoxyChartAnimation(direction:Int):Void {
+		var animName = animNames[direction % 4];
+		
+		if (isFlipped && (animName == 'singLEFT' || animName == 'singRIGHT')) {
+			animName = (animName == 'singLEFT') ? 'singRIGHT' : 'singLEFT';
+		}
+
+		this.playAnimation(animName, true, true);
+	}
+
+	override function onUpdate(event) {
+		super.onUpdate(event);
+		
+		if (foxyTorso != null) {
+			if (currentTween == null || !currentTween.active) {
+				var tx = this.x;
+				if (isFlipped) tx += this.width - foxyTorso.width;
+				foxyTorso.setPosition(tx, this.y);
+			}
+			
+			if (this.animation != null && this.animation.curAnim != null && this.animation.curAnim.name == "idle" && this.animation.curAnim.curFrame == 0 && foxyTorso.animation != null && foxyTorso.animation.curAnim != null) 
+				foxyTorso.animation.curAnim.curFrame = 0;
+			if (!torsoInitialized) {
+				foxyTorso.visible = this.visible;
+				foxyTorso.scale.set(this.scale.x, this.scale.y);
+				foxyTorso.scrollFactor.set(this.scrollFactor.x, this.scrollFactor.y);
+				foxyTorso.zIndex = this.zIndex - 1;
+				foxyTorso.shader = this.shader;
+				foxyTorso.flipX = this.flipX;
+				PlayState.instance.currentStage.add(foxyTorso);
+				PlayState.instance.currentStage.refresh();
+				torsoInitialized = true;
+			}
+		}
+
+		if (currentBeatIndex < songBeatTimes.length && songBeatTimes[currentBeatIndex] <= Conductor.instance.songPosition) {
+			var dir = songBeatDirections[currentBeatIndex];
+			var n = animNames[dir % 4];
+			if (isFlipped && (n == 'singLEFT' || n == 'singRIGHT'))
+				n = (n == 'singLEFT') ? 'singRIGHT' : 'singLEFT';
+			this.playAnimation(n, true, true);
+			currentBeatIndex++;
+		}
+
+		if (currentChartIndex < chartAnimTimes.length && chartAnimTimes[currentChartIndex] <= Conductor.instance.songPosition) {
+			var nextDir:Int = chartAnimDirs[currentChartIndex];
+			playFoxyChartAnimation(nextDir);
+			currentChartIndex++;
+		}
+	}
+
+
+}

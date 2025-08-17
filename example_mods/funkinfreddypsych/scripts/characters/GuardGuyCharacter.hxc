@@ -1,0 +1,79 @@
+import funkin.play.character.SparrowCharacter;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.play.PlayState;
+
+class GuardGuyCharacter extends SparrowCharacter {
+    var steps:Int = 20;
+    var stepPause:Float = 0.15;
+
+    var leftAnimName:String = "sneak-left";
+    var rightAnimName:String = "sneak-right";
+
+    var directionThreshold:Float = -46;
+    var targetX:Float = 0;
+
+    function new() {
+        super('guard');
+    }
+
+    override function onCreate(event) {
+        super.onCreate(event);
+
+        this.playAnimation(leftAnimName, true);
+    }
+
+    public function onSongEvent(event) {
+        super.onSongEvent(event);
+        if (event.eventData.eventKind == "guardSneak") {
+            targetX = event.eventData.value.targetX;
+            sneakGuardSteps(targetX, event.eventData.value.duration);
+        }
+    }
+
+    function sneakGuardSteps(destX:Float, totalDuration:Float) {
+        var guard = PlayState.instance.currentStage.getCharacter("guard");
+        var stepDistance = (destX - guard.x) / steps;
+        var stepDuration = (totalDuration / steps) - stepPause;
+
+        for (i in 0...steps) {
+            FlxTween.tween(guard, { x: guard.x + stepDistance * (i + 1) }, stepDuration, {
+                ease: FlxEase.expoInOut,
+                startDelay: i * (stepDuration + stepPause),
+                onComplete: function() {
+                    if (i == steps - 1) {
+                        this.playAnimation("idle", true);
+                    }
+                }
+            });
+        }
+    }
+
+    override function onUpdate(event) {
+        super.onUpdate(event);
+
+        var guard = PlayState.instance.currentStage.getCharacter("guard");
+        var movingRight = guard.x < directionThreshold;
+
+        var desiredAnim = movingRight ? rightAnimName : leftAnimName;
+        if (this.animation != null && this.animation.curAnim != null) {
+            if (this.animation.curAnim.name != desiredAnim) {
+                var oldFrame = this.animation.curAnim.curFrame;
+                this.playAnimation(desiredAnim, true, false);
+                if (this.animation.curAnim != null) {
+                    this.animation.curAnim.curFrame = oldFrame;
+                }
+            }
+        }
+    }
+
+    override function onSongRetry(event) {
+        super.onSongRetry(event);
+        FlxTween.cancelTweensOf(PlayState.instance.currentStage.getCharacter("guard"));
+    }
+
+    override function onDestroy(event) {
+        FlxTween.cancelTweensOf(PlayState.instance.currentStage.getCharacter("guard"));
+        super.onDestroy(event);
+    }
+}

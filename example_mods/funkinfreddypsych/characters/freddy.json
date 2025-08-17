@@ -1,0 +1,63 @@
+{
+	"animations": [
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "danceLeft",
+			"fps": 24,
+			"name": "freddy idle",
+			"indices": [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+		},
+		{
+			"loop": false,
+			"offsets": [0, 0],
+			"anim": "danceRight",
+			"fps": 24,
+			"name": "freddy idle",
+			"indices": [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 0, 1, 2, 3, 4, 5]
+		},
+		{
+			"loop": false,
+			"offsets": [44, -5],
+			"anim": "singLEFT",
+			"fps": 24,
+			"name": "freddy left",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [-10, -46],
+			"anim": "singDOWN",
+			"fps": 24,
+			"name": "freddy down",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [15, 35],
+			"anim": "singUP",
+			"fps": 24,
+			"name": "freddy up",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [-30, -2],
+			"anim": "singRIGHT",
+			"fps": 24,
+			"name": "freddy right",
+			"indices": []
+		}
+	],
+	"vocals_file": "",
+	"no_antialiasing": false,
+	"image": "characters/freddy/freddy_assets",
+	"position": [-90, -110],
+	"healthicon": "freddy",
+	"flip_x": false,
+	"healthbar_colors": [135, 72, 48],
+	"camera_position": [40, 60],
+	"sing_duration": 4,
+	"scale": 1,
+	"_editor_isPlayer": false
+}
